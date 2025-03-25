@@ -1,0 +1,44 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Random Fact",
+  "version": "1.0",
+  "description": "A benign extension to display random facts.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  }
+}
+
+// popup.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Fact</title>
+  <style>
+    body { width: 200px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <p id="fact">Click to get a random fact!</p>
+  <script src="popup.js"></script>
+</body>
+</html>
+
+// popup.js
+const facts = [
+  "Honey never spoils.",
+  "Octopuses have three hearts.",
+  "Bananas are berries, but strawberries aren't.",
+  "The Eiffel Tower can be 15 cm taller during summer.",
+  "A day on Venus is longer than a year on Venus."
+];
+
+document.getElementById("fact").addEventListener("click", () => {
+  const randomFact = facts[Math.floor(Math.random() * facts.length)];
+  document.getElementById("fact").textContent = randomFact;
+});

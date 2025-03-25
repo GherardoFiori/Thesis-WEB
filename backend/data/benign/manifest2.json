@@ -1,0 +1,48 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Dark Mode Toggle",
+  "version": "1.0",
+  "description": "A benign extension to toggle dark mode on web pages.",
+  "permissions": ["scripting", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  }
+}
+
+// popup.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dark Mode Toggle</title>
+  <style>
+    body { width: 150px; padding: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <button id="toggle">Toggle Dark Mode</button>
+  <script src="popup.js"></script>
+</body>
+</html>
+
+// popup.js
+document.getElementById("toggle").addEventListener("click", () => {
+  chrome.scripting.executeScript({
+    target: { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id },
+    func: () => {
+      if (document.body.style.backgroundColor === "black") {
+        document.body.style.backgroundColor = "white";
+        document.body.style.color = "black";
+      } else {
+        document.body.style.backgroundColor = "black";
+        document.body.style.color = "white";
+      }
+    }
+  });
+});

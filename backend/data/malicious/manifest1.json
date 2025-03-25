@@ -1,0 +1,24 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Simulated Ad Injector",
+  "version": "1.0",
+  "description": "A simulated malicious extension for testing purposes.",
+  "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
+
+// background.js
+chrome.action.onClicked.addListener((tab) => {
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => {
+      // Simulate injecting an ad into the page
+      const ad = document.createElement("div");
+      ad.innerHTML = "<p style='color: red; font-size: 20px;'>Simulated Ad: Buy this product!</p>";
+      document.body.prepend(ad);
+    }
+  });
+});

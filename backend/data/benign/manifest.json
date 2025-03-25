@@ -1,0 +1,54 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Bookmark Saver",
+  "version": "1.0",
+  "description": "A benign extension to save bookmarks.",
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  }
+}
+
+// popup.html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bookmark Saver</title>
+  <style>
+    body { width: 200px; padding: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <button id="save">Save Current Page</button>
+  <ul id="bookmarks"></ul>
+  <script src="popup.js"></script>
+</body>
+</html>
+
+// popup.js
+document.getElementById("save").addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const url = tabs[0].url;
+    chrome.storage.local.get({ bookmarks: [] }, (data) => {
+      const bookmarks = data.bookmarks;
+      bookmarks.push(url);
+      chrome.storage.local.set({ bookmarks }, () => {
+        const list = document.getElementById("bookmarks");
+        list.innerHTML = bookmarks.map((bm) => `<li>${bm}</li>`).join("");
+      });
+    });
+  });
+});
+
+// Load saved bookmarks on popup open
+chrome.storage.local.get({ bookmarks: [] }, (data) => {
+  const list = document.getElementById("bookmarks");
+  list.innerHTML = data.bookmarks.map((bm) => `<li>${bm}</li>`).join("");
+});
