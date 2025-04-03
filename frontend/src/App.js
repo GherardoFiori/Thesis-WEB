@@ -1,42 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [result, setResult] = useState('');
+  const [url, setUrl] = useState("");
   const [file, setFile] = useState(null);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return;
+    setError("");
+    setMessage("Processing...");
 
     const formData = new FormData();
-    formData.append('file', file);
+    if (url) formData.append("url", url);
+    if (file) formData.append("crx_file", file);
 
     try {
-      const response = await fetch('http://localhost:8080/api/analyze/', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/api/analyze/", {
+        method: "POST",
         body: formData,
       });
       const data = await response.json();
-      setResult(data.result || data.error);
+      if (data.status === "success") {
+        setMessage(`File processed: ${data.file_path}`);
+      } else {
+        setError(data.message);
+      }
     } catch (err) {
-      setResult("Failed to connect to server");
+      setError("Failed to connect to the server.");
     }
   };
 
   return (
-    <div>
-      <h1>Extension Malware Detector</h1>
+    <div className="container">
+      <header>
+        <img src="/logo.png" alt="Logo" className="logo" />
+        <h1>AI Detection of Malicious Browser Extensions</h1>
+      </header>
       <form onSubmit={handleSubmit}>
-        <input 
-          type="file" 
-          onChange={(e) => setFile(e.target.files[0])} 
-          accept=".json,.txt" 
+        <input
+          type="text"
+          placeholder="Enter Chrome Web Store URL"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
         />
+        <label className="file-upload">
+          Upload CRX File
+          <input type="file" accept=".crx" onChange={(e) => setFile(e.target.files[0])} />
+        </label>
         <button type="submit">Analyze</button>
       </form>
-      {result && <p>Result: {result}</p>}
+      {error && <div className="error">Error: {error}</div>}
+      {message && <div className="message">{message}</div>}
     </div>
   );
 }
 
-export default App; 
+export default App;
