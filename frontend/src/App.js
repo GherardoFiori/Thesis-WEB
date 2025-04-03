@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import "./App.css";
+import React, { useState } from 'react';
+import { Shield, Upload, Link as LinkIcon } from 'lucide-react';
+import './App.css';
 
 function App() {
   const [url, setUrl] = useState("");
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null); 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -33,26 +34,72 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <header>
-        <img src="/logo.png" alt="Logo" className="logo" />
-        <h1>AI Detection of Malicious Browser Extensions</h1>
-      </header>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Enter Chrome Web Store URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
-        <label className="file-upload">
-          Upload CRX File
-          <input type="file" accept=".crx" onChange={(e) => setFile(e.target.files[0])} />
-        </label>
-        <button type="submit">Analyze</button>
-      </form>
-      {error && <div className="error">Error: {error}</div>}
-      {message && <div className="message">{message}</div>}
+    <div className="app-container">
+      <nav className="navbar">
+        <div className="navbar-content">
+          <div className="logo-container">
+            <Shield className="logo-icon" />
+            <span className="logo-text">ExterminAI</span>
+          </div>
+          <div className="nav-links">
+            <a href="#" className="nav-link">Home</a>
+            <a href="#" className="nav-link">About</a>
+            <a href="#" className="nav-link">Documentation</a>
+          </div>
+        </div>
+      </nav>
+
+      <main className="main-content">
+        <div className="content-card">
+          <h1 className="page-title">
+            AI Detection of Malicious Browser Extensions
+          </h1>
+
+          <form onSubmit={handleSubmit} className="form-container">
+            <div className="input-group">
+              <LinkIcon className="input-icon" />
+              <input
+                type="text"
+                placeholder="Enter Chrome Web Store URL"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="url-input"
+              />
+            </div>
+
+            <label className="file-upload">
+              <div className="file-upload-content">
+                <Upload className="h-6 w-6 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {file ? file.name : "Upload CRX File"}
+                </span>
+              </div>
+              <input
+                type="file"
+                accept=".crx"
+                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                className="hidden"
+              />
+            </label>
+
+            <button type="submit" className="submit-button">
+              Analyze
+            </button>
+          </form>
+
+          {error && (
+            <div className="error-message">
+              <p>Error: {error}</p>
+            </div>
+          )}
+          
+          {message && (
+            <div className="success-message">
+              <p>{message}</p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
