@@ -1,29 +1,37 @@
-🛡️ AI Detection of Malicious Browser Extensions
-Detecting browser extension threats with machine learning and intelligent analysis.
+# 🛡️ AI Detection of Malicious Browser Extensions
 
-🚀 Project Overview
+> Detecting browser extension threats with machine learning and intelligent analysis.
+
+## 🚀 Project Overview
+
 Malicious browser extensions are a growing vector for cybersecurity threats, enabling attackers to steal sensitive data, inject unwanted ads, or hijack browser sessions. This project leverages artificial intelligence to detect potentially harmful browser extensions based on their behavior, metadata, and code structure.
 
 Our goal is to develop a scalable and accurate system that can automatically flag suspicious browser extensions using machine learning techniques, aiding users and researchers in identifying risks early.
 
-🔍 Key Features
-🧠 AI-Powered Detection: Uses supervised and unsupervised models to detect anomalies and classify malicious behaviors.
+## 🔍 Key Features
 
-📦 Extension Analysis: Processes browser extension files (CRX/ZIP), extracts features like permissions, manifest data, JavaScript code patterns, and more.
+- 🧠 **AI-Powered Detection**: Uses supervised and unsupervised models to detect anomalies and classify malicious behaviors.
+- 📦 **Extension Analysis**: Processes browser extension files (CRX/ZIP), extracts features like permissions, manifest data, JavaScript code patterns, and more.
+- 📊 **Feature Engineering**: Analyzes static and dynamic features to train reliable classifiers.
+- 📈 **Model Evaluation**: Supports accuracy, precision-recall, ROC, and confusion matrix analysis for result validation.
+- 🧪 **Dataset Support**: Works with labeled datasets of known malicious and benign extensions.
 
-📊 Feature Engineering: Analyzes static and dynamic features to train reliable classifiers.
+## 🏗️ Architecture
 
-📈 Model Evaluation: Supports accuracy, precision-recall, ROC, and confusion matrix analysis for result validation.
+1. **Data Collection**: Curates a dataset of extensions, labeled as malicious or benign.
+2. **Feature Extraction**: Parses extension files for relevant attributes and code signals.
+3. **Model Training**: Applies machine learning algorithms (e.g., Random Forest, SVM, XGBoost, or Neural Networks).
+4. **Prediction**: Classifies new/unseen extensions with a threat score or binary output.
+5. **Evaluation & Visualization**: Tools to visualize performance and explore feature importances.
 
-🧪 Dataset Support: Works with labeled datasets of known malicious and benign extensions.
+## 🧰 Technologies Used
 
-🏗️ Architecture
-Data Collection: Curates a dataset of extensions, labeled as malicious or benign.
+- Python 3.x
+- Scikit-learn, XGBoost, PyTorch/TensorFlow (optional)
+- Pandas, NumPy
+- Matplotlib, Seaborn
+- CRX/ZIP parsing libraries
+- (Optional) NLP libraries for source code analysis
 
-Feature Extraction: Parses extension files for relevant attributes and code signals.
 
-Model Training: Applies machine learning algorithms (e.g., Random Forest, SVM, XGBoost, or Neural Networks).
 
-Prediction: Classifies new/unseen extensions with a threat score or binary output.
-
-Evaluation & Visualization: Tools to visualize performance and explore feature importances.
