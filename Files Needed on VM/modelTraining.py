@@ -8,10 +8,10 @@ from sklearn.metrics import accuracy_score
 from dataProcess import extract_bulk
 
 # Paths
-TRAIN_DIR = "/home/sanboxuser/malware_extracted"
-FEATURES_PATH = "/home/sanboxuser/features.json"
-MODEL_PATH = "/home/sanboxuser/model.pkl"
-VECTORIZER_PATH = "/home/sanboxuser/vectorizer.pkl"
+TRAIN_DIR = "PATH TO DATA FOR TRAINING"
+FEATURES_PATH = "PATH TO /features.json"
+MODEL_PATH = "PATH TO /model.pkl"
+VECTORIZER_PATH = "PATH TO /vectorizer.pkl"
 
 # SExtract features
 extract_bulk(TRAIN_DIR, FEATURES_PATH)

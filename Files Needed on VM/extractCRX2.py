@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import json
 
-os.makedirs("/home/sanboxuser/tmp_extract", exist_ok=True)
+os.makedirs("PLACE PATH TO WHERE CRX IS STORED HERE", exist_ok=True)
 
 
 # Ensure a CRX path is passed
@@ -21,7 +21,7 @@ if not os.path.isfile(CRX_PATH):
 
 # Set up extraction path
 base_name = os.path.splitext(os.path.basename(CRX_PATH))[0]
-extract_dir = f"/home/sanboxuser/tmp_extract/{base_name}"
+extract_dir = f"PLACE PATH TO WHERE CRX IS STORED HERE/{base_name}"
 os.makedirs(extract_dir, exist_ok=True)
 
 # Extract using 7z
@@ -34,7 +34,7 @@ except subprocess.CalledProcessError as e:
 
 try:
     result = subprocess.run(
-        ["python3", "/home/sanboxuser/predictCRX.py", extract_dir],
+        ["python3", "PATH TO /predictCRX.py", extract_dir],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
