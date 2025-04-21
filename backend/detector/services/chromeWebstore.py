@@ -1,13 +1,41 @@
 import os
 import re
 import json
+from dotenv import load_dotenv
 import subprocess
 import tempfile
 import zipfile
+import paramiko
 import requests
 from urllib.parse import urlparse, parse_qs
 from django.http import JsonResponse
 from django.views import View
+
+
+load_dotenv()
+
+VM_HOST = os.getenv("VM_HOST")
+VM_USER = os.getenv("VM_USER")
+VM_KEY = os.getenv("VM_KEY")
+VM_REMOTE_PATH = os.getenv("VM_REMOTE_PATH")
+VM_CRX_LOC = os.getenv("VM_CRX_LOC")
+
+def uploadToVM(local_file_path, remote_path, ssh_client):
+    try:
+        sftp = ssh_client.open_sftp()
+        sftp.put(local_file_path, remote_path)
+        sftp.close()
+        return True
+    except Exception as e:
+        print(f"Error uploading to VM: {e}")
+        return False
+
+
+def getSSH():
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Automatically adds unknown host keys
+    ssh.connect(VM_HOST, username= VM_USER, key_filename= VM_KEY)
+    return ssh
 
 class ExtensionAnalyzer(View):
     def getExtensionID(self, url):
@@ -68,7 +96,7 @@ class ExtensionAnalyzer(View):
         
         return []
 
-    def get(self, request): # Just some simple error handling for trouble shooting
+    def get(self, request):
         url = request.GET.get("url")
         if not url:
             return JsonResponse({"error": "No URL provided."}, status=400)
@@ -88,8 +116,17 @@ class ExtensionAnalyzer(View):
         
         permissions = self.analyzePermissions(extract_dir)
         
+        
+        sshClient = getSSH()
+        remoteFilePath = os.path.join(VM_CRX_LOC, f"{extension_id}.crx")
+        upload_success = uploadToVM(file_path, remoteFilePath, sshClient)
+        
+        if not upload_success:
+            return JsonResponse({"error": "Failed to upload file to VM."}, status=500)
+        
         return JsonResponse({
             "extension_id": extension_id,
             "browser": browser,
             "permissions": permissions,
+            "remote_file_path": remoteFilePath, 
         })

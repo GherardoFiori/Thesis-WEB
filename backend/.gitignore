@@ -1,0 +1,10 @@
+.env
+*.crx
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.pem
+*.key
+*.pub

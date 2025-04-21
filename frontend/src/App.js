@@ -7,29 +7,52 @@ function App() {
   const [file, setFile] = useState(null); 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getCsrfToken = async () => {
+    const response = await fetch("http://localhost:8080/api/csrf/", {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    return data.csrfToken;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setMessage("Processing...");
-
-    const formData = new FormData();
-    if (url) formData.append("url", url);
-    if (file) formData.append("crx_file", file);
+    setMessage("");
+    setIsLoading(true);
 
     try {
+      const csrfToken = await getCsrfToken();
+      const formData = new FormData();
+      
+      if (url) formData.append('url', url);
+      if (file) formData.append('crx_file', file);
+
       const response = await fetch("http://localhost:8080/api/analyze/", {
         method: "POST",
-        body: formData,
+        headers: {
+          "X-CSRFToken": csrfToken
+        },
+        credentials: 'include',
+        body: formData
       });
+
       const data = await response.json();
-      if (data.status === "success") {
-        setMessage(`File processed: ${data.file_path}`);
+      if (response.ok) {
+        setMessage(data.message || "File processed successfully!");
+        if (data.remote_path) {
+          setMessage(prev => `${prev} File saved to VM at: ${data.remote_path}`);
+        }
       } else {
-        setError(data.message);
+        throw new Error(data.message || "Failed to process file");
       }
     } catch (err) {
-      setError("Failed to connect to the server.");
+      setError(err.message || "Failed to connect to server");
+      console.error("Submission error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,6 +87,7 @@ function App() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="url-input"
+                disabled={isLoading}
               />
             </div>
 
@@ -77,13 +101,18 @@ function App() {
               <input
                 type="file"
                 accept=".crx"
-                onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="hidden"
+                disabled={isLoading}
               />
             </label>
 
-            <button type="submit" className="submit-button">
-              Analyze
+            <button 
+              type="submit" 
+              className="submit-button"
+              disabled={isLoading || (!url && !file)}
+            >
+              {isLoading ? 'Analyzing...' : 'Analyze'}
             </button>
           </form>
 

@@ -1,56 +1,72 @@
 import os
-import subprocess
+from dotenv import load_dotenv
+import paramiko
 import requests
+from scp import SCPClient
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-SANDBOX_DIR = os.path.join(os.path.dirname(__file__), "sandbox")
-CHROME_VERSION = "134.0.6998.178"  
-USE_REQUESTS = True  
 
+load_dotenv()
+VM_HOST = os.getenv("VM_HOST")
+VM_USER = os.getenv("VM_USER")
+VM_KEY = os.getenv("VM_KEY")
+VM_REMOTE_PATH = os.getenv("VM_REMOTE_PATH")
+
+
+# Constants
+SANDBOX_DIR = os.path.join(os.path.dirname(__file__), "sandbox")
+CHROME_VERSION = "134.0.6998.178"
 os.makedirs(SANDBOX_DIR, exist_ok=True)
 
-@csrf_exempt
+# CSRF Token Endpoint
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({"csrfToken": request.META.get('CSRF_COOKIE')})
+
 @require_POST
 def analyze_extension(request):
     try:
-        # This is where the url is handled
+        # Handle URL case
         if request.POST.get("url"):
             url = request.POST["url"]
-            result = download_crx(url)
+            result = download_crx(url)  # Now properly defined below
             return JsonResponse(result)
         
-        # This is where the file is handled
-        if request.ILES.get('crx_file'):
-            return handleFileUpload(request)
-        
-        return JsonResponse({"status": "error", "message": "No URL or file provided"})
+        # Handle file upload case
+        if 'crx_file' in request.FILES:
+            file = request.FILES['crx_file']
+            extension_id = request.POST.get('extension_id', 'uploaded')
+            
+            # Save locally
+            local_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
+            with open(local_path, 'wb+') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+            
+            # Transfer to VM
+            remote_path = os.path.join(VM_REMOTE_PATH, f"{extension_id}.crx")
+            transfer_success = transfer_to_vm(local_path, remote_path)
+            
+            if not transfer_success:
+                raise Exception("VM transfer failed")
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "File processed",
+                "remote_path": remote_path,
+                "size": os.path.getsize(local_path)
+            })
+            
+        return JsonResponse({"status": "error", "message": "No file or URL provided"})
     
     except Exception as e:
-        return JsonResponse({"status": "error", "message": f"Server error: {str(e)}"})
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
-def handleFileUpload(request):
-    file = request.FILES['crx_file']
-    extension_id = request.POST.get('extension_id', 'uploaded')
-    
-    try:
-        file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
-        with open(file_path, 'wb') as f:
-            for chunk in file.chunks():
-                f.write(chunk)
-        
-        return JsonResponse({
-            "status": "success", 
-            "file_path": file_path,
-            "size": os.path.getsize(file_path)
-        })
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": f"File upload failed: {str(e)}"})
-
+# CRX Download Function (now properly defined)
 def download_crx(url):
     try:
-        # Extract extension ID
         if not ("chrome.google.com" in url or "chromewebstore.google.com" in url):
             raise ValueError("Invalid Chrome Web Store URL")
             
@@ -58,30 +74,28 @@ def download_crx(url):
         if not extension_id:
             raise ValueError("Could not extract extension ID")
         
-        if USE_REQUESTS:
-            result = downloadWithRequests(extension_id)
-        else:
-            result = downloadWithWget(extension_id)
-
-        # just needed during trouble shooting
-        file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
-        print(f"\nDEBUG INFO:")
-        print(f"Extension ID: {extension_id}")
-        print(f"Target path: {file_path}")
-        print(f"File exists: {os.path.exists(file_path)}")
-        print(f"File size: {os.path.getsize(file_path) if os.path.exists(file_path) else 0} bytes")
-        
-        return result
+        return download_with_requests(extension_id)
             
     except Exception as e:
         return {
             "status": "error", 
             "message": str(e),
-            "debug": {"url": url, "extension_id": extension_id}
+            "debug": {"url": url}
         }
 
-def downloadWithRequests(extension_id):
-    """Download using Python requests library."""
+# Helper Functions
+def extract_extension_id(url):
+    try:
+        parts = url.split('/')
+        if '/detail/' in url:
+            return parts[-1]
+        elif '?id=' in url:
+            return url.split('?id=')[1].split('&')[0]
+        return None
+    except Exception:
+        return None
+
+def download_with_requests(extension_id):
     crx_url = (
         f"https://clients2.google.com/service/update2/crx?"
         f"response=redirect&prodversion={CHROME_VERSION}&"
@@ -91,18 +105,9 @@ def downloadWithRequests(extension_id):
     file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
     
     try:
-        response = requests.get(
-            crx_url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-User": "?1",
-                "Sec-Fetch-Dest": "document"
-            },
-            timeout=30
-        )
+        response = requests.get(crx_url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+        }, timeout=30)
         response.raise_for_status()
         
         with open(file_path, 'wb') as f:
@@ -110,10 +115,18 @@ def downloadWithRequests(extension_id):
             
         if os.path.getsize(file_path) == 0:
             raise ValueError("Downloaded empty file")
+        
+        # Transfer to VM
+        remote_path = os.path.join(VM_REMOTE_PATH, f"{extension_id}.crx")
+        transfer_success = transfer_to_vm(file_path, remote_path)
+        
+        if not transfer_success:
+            raise ValueError("Failed to transfer file to VM")
             
         return {
             "status": "success",
             "file_path": file_path,
+            "remote_path": remote_path,
             "size": os.path.getsize(file_path)
         }
         
@@ -127,56 +140,32 @@ def downloadWithRequests(extension_id):
             }
         }
 
-def downloadWithWget(extension_id):
-    """Download using wget (fallback method)."""
-    crx_url = (
-        f"https://clients2.google.com/service/update2/crx?"
-        f"response=redirect&prodversion={CHROME_VERSION}&"
-        f"acceptformat=crx3&x=id%3D{extension_id}%26uc"
-    )
-    
-    file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
-    
+# VM Transfer Function
+def transfer_to_vm(local_path, remote_path):
     try:
-        result = subprocess.run(
-            ['wget', '--tries=3', '--timeout=30', crx_url, '-O', file_path],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(
+            hostname=VM_HOST,
+            username=VM_USER,
+            key_filename=VM_KEY,
+            timeout=10
         )
         
-        if not os.path.exists(file_path):
-            raise ValueError("File not created")
-            
-        return {
-            "status": "success",
-            "file_path": file_path,
-            "size": os.path.getsize(file_path),
-            "debug": {
-                "stdout": result.stdout,
-                "stderr": result.stderr
-            }
-        }
+        # Create remote directory if needed
+        ssh.exec_command(f"mkdir -p {os.path.dirname(remote_path)}")
         
-    except subprocess.CalledProcessError as e:
-        return {
-            "status": "error",
-            "message": "wget download failed",
-            "debug": {
-                "stdout": e.stdout,
-                "stderr": e.stderr,
-                "returncode": e.returncode
-            }
-        }
-
-def extract_extension_id(url):
-    try:
-        parts = url.split('/')
-        if '/detail/' in url:
-            return parts[-1]
-        elif '?id=' in url:
-            return url.split('?id=')[1].split('&')[0]
-        return None
-    except Exception:
-        return None
+        with SCPClient(ssh.get_transport()) as scp:
+            scp.put(local_path, remote_path)
+        
+        # Verify transfer
+        stdin, stdout, stderr = ssh.exec_command(f"ls {remote_path}")
+        if not stdout.read().decode().strip():
+            raise Exception("File not found on VM after transfer")
+            
+        return True
+    except Exception as e:
+        print(f"VM Transfer Error: {str(e)}")
+        return False
+    finally:
+        ssh.close()
