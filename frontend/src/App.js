@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Upload, Link as LinkIcon } from 'lucide-react';
 import './App.css';
+import ReportCard from './ReportCard';
 
 function App() {
   const [url, setUrl] = useState("");
@@ -8,6 +9,9 @@ function App() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [verdict, setVerdict] = useState(null);
+  const [confidence, setConfidence] = useState(null);
+  const [features, setFeatures] = useState(null);
 
   const getCsrfToken = async () => {
     const response = await fetch("http://localhost:8080/api/csrf/", {
@@ -21,6 +25,7 @@ function App() {
     e.preventDefault();
     setError("");
     setMessage("");
+    setVerdict(null); // Reset report
     setIsLoading(true);
 
     try {
@@ -40,14 +45,22 @@ function App() {
       });
 
       const data = await response.json();
+
       if (response.ok) {
-        setMessage(data.message || "File processed successfully!");
-        if (data.remote_path) {
-          setMessage(prev => `${prev} File saved to VM at: ${data.remote_path}`);
+        setMessage(data.message || "Extension analyzed successfully!");
+
+        console.log("Received verdict:", data.verdict);
+        console.log("Features:", data.features);
+
+        if (data.verdict) {
+          setVerdict(data.verdict);
+          setConfidence(data.confidence);
+          setFeatures(data.features);
         }
       } else {
         throw new Error(data.message || "Failed to process file");
       }
+
     } catch (err) {
       setError(err.message || "Failed to connect to server");
       console.error("Submission error:", err);
@@ -121,11 +134,19 @@ function App() {
               <p>Error: {error}</p>
             </div>
           )}
-          
+
           {message && (
             <div className="success-message">
               <p>{message}</p>
             </div>
+          )}
+
+          {verdict && (
+            <ReportCard
+              verdict={verdict}
+              confidence={confidence}
+              features={features}
+            />
           )}
         </div>
       </main>

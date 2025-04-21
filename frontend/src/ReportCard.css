@@ -1,0 +1,34 @@
+.report-card {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .verdict {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .verdict.benign {
+    color: green;
+  }
+  
+  .verdict.malicious {
+    color: red;
+  }
+  
+  .feature-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .feature-table th,
+  .feature-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: left;
+  }
+  
