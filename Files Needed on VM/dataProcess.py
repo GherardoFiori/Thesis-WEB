@@ -1,6 +1,8 @@
 import os
 import json
 import math
+from collections import Counter
+
 
 KEYWORDS = [
     "eval", "Function", "atob", "fetch(", "XMLHttpRequest",
@@ -14,8 +16,9 @@ PERMISSIONS = [
 def calculate_entropy(content):
     if not content:
         return 0
-    prob = [float(content.count(c)) / len(content) for c in dict.fromkeys(content)]
-    entropy = -sum([p * math.log2(p) for p in prob])
+    counter = Counter(content)
+    total = len(content)
+    entropy = -sum(count/total * math.log2(count/total) for count in counter.values())
     return round(entropy, 2)
 
 def extract_js_features(js_code):
@@ -95,7 +98,7 @@ def extract_bulk(training_dir, output_path):
     for root, dirs, files in os.walk(training_dir):
         if "manifest.json" in files:
             feats = extract_features_from_folder(root)
-            if "BenignSample" in root:
+            if "bening_extracted" in root:
                 feats["label"] = 0
             else:
                 feats["label"] = 1
