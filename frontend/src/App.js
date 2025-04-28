@@ -91,6 +91,16 @@ function App() {
             AI Detection of Malicious Browser Extensions
           </h1>
 
+          <div className="supported-browsers">
+            <h3 className="support-text">Now Supporting:</h3>
+              <div className="browser-logos">
+                <img src="/chrome-logo.png" alt="Chrome" className="browser-icon" title="Chrome Browser"/>
+                <img src="/firefox-logo.png" alt="Firefox" className="browser-icon" title="Firefox Browser"/>
+                {/* <img src="/edge-logo.png" alt="Edge" className="browser-icon" title="Edge Browser" /> */}
+                {/* <img src="/opera-logo.png" alt="Opera" className="browser-icon" title="Opera Browser" /> */}
+          </div>
+              </div>
+
           <form onSubmit={handleSubmit} className="form-container">
             <div className="input-group">
               <LinkIcon className="input-icon" />

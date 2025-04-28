@@ -41,37 +41,68 @@ class ExtensionAnalyzer(View):
     def getExtensionID(self, url):
 
         parsed_url = urlparse(url)
-        
+        # Google Chrome
         if "chrome.google.com" in parsed_url.netloc:
             match = re.search(r"detail/[^/]+/([a-zA-Z0-9_-]+)", parsed_url.path)
             if match:
                 return match.group(1)
+        
+        elif "microsoftedge.microsoft.com" in parsed_url.netloc:
+        # Microsoft Edge Add-ons
+            match = re.search(r"detail/[^/]+/([a-zA-Z0-9_-]+)", parsed_url.path)
+            if match:
+                return match.group(1), "edge"
+        
         elif "addons.mozilla.org" in parsed_url.netloc:
+        # Firefox Add-ons
             query_params = parse_qs(parsed_url.query)
-            return query_params.get("id", [None])[0]
+            addon_id = query_params.get("id", [None])[0]
+            return addon_id, "firefox"
+        
+        elif "addons.opera.com" in parsed_url.netloc:
+        # Opera Add-ons
+            match = re.search(r"extensions/details/([a-zA-Z0-9_-]+)", parsed_url.path)
+            if match:
+                return match.group(1), "opera"
+
         
         return None
 
-    def downloadExtension(self, extension_id, browser="chrome"):
-        temp_dir = tempfile.mkdtemp()
-        file_path = os.path.join(temp_dir, f"{extension_id}.crx" if browser == "chrome" else f"{extension_id}.xpi")
-        
-        if browser == "chrome":
-            download_url = f"https://clients2.google.com/service/update2/crx?response=redirect&prodversion=91.0&acceptformat=crx2,crx3&x=id%3D{extension_id}%26installsource%3Dondemand%26uc"
-        else:
-            download_url = f"https://addons.mozilla.org/firefox/downloads/latest/{extension_id}/addon-latest.xpi"
-        
-        try:
-            response = requests.get(download_url, stream=True, timeout=10)
-            response.raise_for_status()
-            
-            with open(file_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            
-            return file_path
-        except requests.RequestException as e:
-            return None
+def downloadExtension(extension_id, browser="chrome"):
+    temp_dir = tempfile.mkdtemp()
+    file_extension = {
+        "chrome": ".crx",
+        "edge": ".crx",
+        "firefox": ".xpi",
+        "opera": ".crx"
+    }.get(browser, ".crx")
+
+    file_path = os.path.join(temp_dir, f"{extension_id}{file_extension}")
+
+    if browser == "chrome":
+        download_url = f"https://clients2.google.com/service/update2/crx?response=redirect&prodversion=91.0&acceptformat=crx3&x=id%3D{extension_id}%26uc"
+    elif browser == "edge":
+        download_url = f"https://edge.microsoft.com/extensionwebstorebase/v1/crx?response=redirect&x=id%3D{extension_id}%26uc"
+    elif browser == "firefox":
+        download_url = f"https://addons.mozilla.org/firefox/downloads/latest/{extension_id}/addon-latest.xpi"
+    elif browser == "opera":
+        # Opera just wraps Chrome extensions
+        download_url = f"https://addons.opera.com/extensions/download/{extension_id}/"
+
+    try:
+        response = requests.get(download_url, stream=True, timeout=10)
+        response.raise_for_status()
+
+        with open(file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+        return file_path
+    except requests.RequestException as e:
+        return None
+
+
+
 
     def extractExtension(self, file_path, browser="chrome"):
         extractDir = tempfile.mkdtemp()

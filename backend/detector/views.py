@@ -73,14 +73,23 @@ def analyze_extension(request):
 
 def download_crx(url):
     try:
-        if not ("chrome.google.com" in url or "chromewebstore.google.com" in url):
-            raise ValueError("Invalid Chrome Web Store URL")
+        if not (
+            "chrome.google.com" in url or 
+            "chromewebstore.google.com" in url or 
+            "addons.mozilla.org" in url or 
+            "microsoftedge.microsoft.com/addons" in url
+            ):
+             raise ValueError("Invalid Extension Store URL")
 
-        extension_id = extract_extension_id(url)
+        extension_id, browser = extract_extension_id(url)
         if not extension_id:
             raise ValueError("Could not extract extension ID")
+        
+        if browser == "edge":
+            raise ValueError("Direct download from Microsoft Edge Add-ons is not supported yet.")
 
-        return download_with_requests(extension_id)
+
+        return download_with_requests(extension_id, browser)
 
     except Exception as e:
         return {
@@ -92,24 +101,41 @@ def download_crx(url):
 
 def extract_extension_id(url):
     try:
-        parts = url.split('/')
-        if '/detail/' in url:
-            return parts[-1]
-        elif '?id=' in url:
-            return url.split('?id=')[1].split('&')[0]
-        return None
+        if "chrome.google.com" in url or "chromewebstore.google.com" in url:
+            parts = url.split('/')
+            return parts[-1], "chrome"  # Chrome extensions have ID at the end
+
+        elif "addons.mozilla.org" in url:
+            parts = url.split('/')
+            if 'addon' in parts:
+                idx = parts.index('addon')
+                return parts[idx + 1], "firefox"  # In Firefox URL, extension slug after "addon/"
+
+        elif "microsoftedge.microsoft.com/addons" in url:
+            raise ValueError("Direct downloads from Microsoft Edge Addons Store are not supported yet.")
+
+
+        else:
+            return None
+
     except Exception:
         return None
 
 
-def download_with_requests(extension_id):
-    crx_url = (
-        f"https://clients2.google.com/service/update2/crx?"
-        f"response=redirect&prodversion={CHROME_VERSION}&"
-        f"acceptformat=crx3&x=id%3D{extension_id}%26uc"
-    )
+def download_with_requests(extension_id, browser):
+    if browser == "chrome" or browser == "edge":
+        crx_url = (
+            f"https://clients2.google.com/service/update2/crx?"
+            f"response=redirect&prodversion={CHROME_VERSION}&"
+            f"acceptformat=crx3&x=id%3D{extension_id}%26uc"
+        )
+    elif browser == "firefox":
+        crx_url = f"https://addons.mozilla.org/firefox/downloads/latest/{extension_id}/addon-latest.xpi"
+    else:
+        return {"status": "error", "message": "Unknown browser type"}
 
-    file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.crx")
+    file_extension = "crx" if browser in ("chrome", "edge") else "xpi"
+    file_path = os.path.join(SANDBOX_DIR, f"{extension_id}.{file_extension}")
 
     try:
         response = requests.get(crx_url, headers={
@@ -123,7 +149,7 @@ def download_with_requests(extension_id):
         if os.path.getsize(file_path) == 0:
             raise ValueError("Downloaded empty file")
 
-        remote_path = os.path.join(VM_REMOTE_PATH, f"{extension_id}.crx")
+        remote_path = os.path.join(VM_REMOTE_PATH, f"{extension_id}.{file_extension}")
         transfer_success = transfer_to_vm(file_path, remote_path)
 
         if not transfer_success:
@@ -140,6 +166,16 @@ def download_with_requests(extension_id):
             "verdict": analysis_result["result"].get("verdict"),
             "confidence": analysis_result["result"].get("confidence"),
             "features": analysis_result["result"].get("features", {})
+        }
+
+    except requests.RequestException as e:
+        return {
+            "status": "error",
+            "message": f"Download failed: {str(e)}",
+            "debug": {
+                "url": crx_url,
+                "status_code": getattr(e.response, 'status_code', None)
+            }
         }
 
     except requests.RequestException as e:
