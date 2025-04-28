@@ -6,7 +6,7 @@
 
 Malicious browser extensions are a growing vector for cybersecurity threats, enabling attackers to steal sensitive data, inject unwanted ads, or hijack browser sessions. This project leverages artificial intelligence to detect potentially harmful browser extensions based on their behavior, metadata, and code structure.
 
-Our goal is to develop a scalable and accurate system that can automatically flag suspicious browser extensions using machine learning techniques, aiding users and researchers in identifying risks early.
+My goal is to develop a scalable and accurate system that can automatically flag suspicious browser extensions using machine learning techniques, aiding users and researchers in identifying risks early.
 
 ## 🔍 Key Features
 
