@@ -26,8 +26,8 @@ SECRET_KEY = 'django-insecure-52yil#sup!(s_1gt6xrg=xw3&!mh()quw1(0jr@x)rb_du)yg6
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "https://www.exterminai.com/",
-    "https://exterminai.com/"
+    "www.exterminai.com",
+    "exterminai.com"
 ]
 
 
@@ -60,13 +60,14 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", 
     "http://127.0.0.1:3000",
-    "https://www.exterminai.com/"
+    "https://www.exterminai.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "https://www.exterminai.com/"                    ]
+    "https://www.exterminai.com"                    
+    ]
 
 ROOT_URLCONF = 'backend.urls'
 
