@@ -1,6 +1,6 @@
 import os
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from .services.crx_handler import download_crx
 from .services.vm_transfer import transfer_to_vm
