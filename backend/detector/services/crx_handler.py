@@ -52,6 +52,11 @@ def download_with_requests(extension_id, browser):
         response = requests.get(crx_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
         response.raise_for_status()
 
+        # Check Content-Type  if HTML it means something went wrong
+        if "text/html" in response.headers.get("Content-Type", ""):
+             raise ValueError("Received HTML instead of a CRX file. Extension may not be available for direct download.")
+
+         # Save the CRX or XPI file
         with open(file_path, 'wb') as f:
             f.write(response.content)
 
