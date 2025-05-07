@@ -35,7 +35,7 @@ function App() {
       if (url) formData.append('url', url);
       if (file) formData.append('crx_file', file);
 
-      const response = await fetch("https://www.exterminai/api/analyze/", {
+      const response = await fetch("https://www.exterminai.com/api/analyze/", {
         method: "POST",
         headers: {
           "X-CSRFToken": csrfToken
