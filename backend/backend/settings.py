@@ -28,6 +28,7 @@ DEBUG = True
 SECURE_SSL_REDIRECT = True
 
 ALLOWED_HOSTS = [
+    "ai-detection-of-malicious-browser.onrender.com",
     "www.exterminai.com",
     "exterminai.com"
 ]
