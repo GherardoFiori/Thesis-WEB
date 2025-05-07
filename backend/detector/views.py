@@ -16,6 +16,7 @@ def get_csrf_token(request):
     token = get_token(request)
     response = JsonResponse({"csrfToken": token})
     response["Access-Control-Allow-Credentials"] = "true"
+    response["Access-Control-Allow-Origin"] = request.headers.get("Origin", "")  # ADD THIS
     return response
 
 

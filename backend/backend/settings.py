@@ -28,10 +28,9 @@ DEBUG = True
 SECURE_SSL_REDIRECT = True
 
 ALLOWED_HOSTS = [
-    "https://ai-detection-of-malicious-browser.onrender.com",
-    "ai-detection-of-malicious-browser.onrender.com",
     "www.exterminai.com",
-    "exterminai.com"
+    "exterminai.com",
+    "ai-detection-of-malicious-browser.onrender.com"
 ]
 
 
@@ -67,8 +66,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", 
     "http://127.0.0.1:3000",
     "https://www.exterminai.com",
-    "https://exterminai.com",
-    "https://ai-detection-of-malicious-browser.onrender.com"
+    "https://exterminai.com"
 ]
 
 CSRF_COOKIE_SECURE = True
