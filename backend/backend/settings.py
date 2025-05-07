@@ -63,10 +63,11 @@ MIDDLEWARE = [
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000",
-    "https://www.exterminai.com",
-    "https://exterminai.com"
+    "https://www.exterminai.com", 
+    "https://exterminai.com",
+    "https://ai-detection-of-malicious-browser.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 
 CSRF_COOKIE_SECURE = True
