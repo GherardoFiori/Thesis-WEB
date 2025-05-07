@@ -71,6 +71,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://ai-detection-of-malicious-browser.onrender.com"
 ]
 
+CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",

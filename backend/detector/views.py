@@ -2,6 +2,7 @@ import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
+from django.middleware.csrf import get_token
 from .services.crx_handler import download_crx
 from .services.vm_transfer import transfer_to_vm
 from .services.vm_analysis import run_analysis_on_vm
@@ -12,7 +13,10 @@ os.makedirs(SANDBOX_DIR, exist_ok=True)
 
 @ensure_csrf_cookie
 def get_csrf_token(request):
-    return JsonResponse({"csrfToken": request.META.get('CSRF_COOKIE')})
+    token = get_token(request)
+    response = JsonResponse({"csrfToken": token})
+    response["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 
 @require_POST
@@ -54,3 +58,5 @@ def analyze_extension(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    
+    
