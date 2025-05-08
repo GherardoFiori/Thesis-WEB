@@ -1,5 +1,6 @@
 import os
 import paramiko
+import io
 from scp import SCPClient
 from dotenv import load_dotenv
 
@@ -13,7 +14,10 @@ def transfer_to_vm(local_path, remote_path):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        pkey = paramiko.RSAKey.from_private_key_file(VM_KEY)
+        try:
+            pkey = paramiko.RSAKey.from_private_key_file(VM_KEY)
+        except paramiko.ssh_exception.SSHException:
+            pkey = paramiko.Ed25519Key.from_private_key_file(VM_KEY)
 
         ssh.connect(hostname=VM_HOST, username=VM_USER, pkey=pkey, timeout=10)
 
