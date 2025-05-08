@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Shield, Upload, Link as LinkIcon } from 'lucide-react';
 import './App.css';
 import ReportCard from './ReportCard';
+import logo from './assets/ExterminAI logo.png';
 
 function App() {
   const [url, setUrl] = useState("");
@@ -88,14 +89,13 @@ function App() {
     <div className="app-container">
       <nav className="navbar">
         <div className="navbar-content">
-          <div className="logo-container">
-            <Shield className="logo-icon" />
-            <span className="logo-text">ExterminAI</span>
-          </div>
+           <div className="logo-container">
+              <img src={logo} alt="ExterminAI Logo" className="logo-image" />
+            </div>
           <div className="nav-links">
             <a href="#" className="nav-link">Home</a>
             <a href="#" className="nav-link">About</a>
-            <a href="#" className="nav-link">Documentation</a>
+            <a href="#" className="nav-link">Help</a>
           </div>
         </div>
       </nav>
