@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Shield, Upload, Link as LinkIcon } from 'lucide-react';
 import './App.css';
 import ReportCard from './ReportCard';
