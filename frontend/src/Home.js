@@ -12,6 +12,7 @@ function Home() {
   const [verdict, setVerdict] = useState(null);
   const [confidence, setConfidence] = useState(null);
   const [features, setFeatures] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   const getCsrfToken = useCallback(async () => {
     try {
@@ -42,6 +43,13 @@ function Home() {
     setMessage("");
     setVerdict(null);
     setIsLoading(true);
+    setProgress(0);
+      let progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) return 90; 
+          return prev + 10;
+        });
+      }, 300);
 
     try {
       const csrfToken = await getCsrfToken();
@@ -79,7 +87,15 @@ function Home() {
     } catch (err) {
       setError(err.message || "Failed to connect to server");
       console.error("Submission error:", err);
-    } finally {
+
+      clearInterval(progressInterval);
+      setProgress(100);
+  
+    } 
+    
+    finally {
+      setIsLoading(false);
+      setTimeout(() => setProgress(0), 500); // for smooth UX
       setIsLoading(false);
     }
   };
@@ -87,16 +103,25 @@ function Home() {
   return (
     <div className="content-card">
       <h1 className="page-title">
-        AI Detection of Malicious Browser Extensions
-      </h1>
+          AI Detection of Malicious Browser Extensions
+        </h1>
 
       <div className="supported-browsers">
+      <a href="/help" className="help-link">
+            Need help finding the URLs?
+          </a>
         <h3 className="support-text">Now Supporting:</h3>
         <div className="browser-logos">
           <img src="/chrome-logo.png" alt="Chrome" className="browser-icon" title="Chrome Browser" />
           <img src="/firefox-logo.png" alt="Firefox" className="browser-icon" title="Firefox Browser" />
         </div>
       </div>
+
+      {isLoading && (
+  <div className="progress-container">
+    <div className="progress-bar" style={{ width: `${progress}%` }} />
+  </div>
+)}
 
       <form onSubmit={handleSubmit} className="form-container">
         <div className="input-group">
@@ -126,6 +151,10 @@ function Home() {
             disabled={isLoading}
           />
         </label>
+
+        {isLoading && (
+  <div className="loading-bar" />
+)}
 
         <button
           type="submit"
