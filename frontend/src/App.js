@@ -13,13 +13,28 @@ function App() {
   const [confidence, setConfidence] = useState(null);
   const [features, setFeatures] = useState(null);
 
-  const getCsrfToken = async () => {
-    const response = await fetch("https://ai-detection-of-malicious-browser.onrender.com/api/csrf/", {
-      credentials: 'include'
-    });
-    const data = await response.json();
-    return data.csrfToken;
-  };
+  const getCsrfToken = useCallback(async () => {
+    try {
+      const response = await fetch("https://ai-detection-of-malicious-browser.onrender.com/api/csrf/", {
+        credentials: 'include',
+        cache: 'no-store' 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`CSRF token fetch failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.csrfToken) {
+        throw new Error('CSRF token not found in response');
+      }
+      
+      return data.csrfToken;
+    } catch (err) {
+      console.error("CSRF token error:", err);
+      throw new Error("Failed to get security token. Please refresh the page and try again.");
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,11 +53,11 @@ function App() {
       const response = await fetch("https://ai-detection-of-malicious-browser.onrender.com/api/analyze/", {
         method: "POST",
         headers: {
-          "X-CSRFToken": csrfToken
+          "X-CSRFToken": csrfToken,
         },
         credentials: 'include',
         body: formData
-      });
+      });;
 
       const data = await response.json();
 
