@@ -12,7 +12,10 @@ def transfer_to_vm(local_path, remote_path):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(hostname=VM_HOST, username=VM_USER, key_filename=VM_KEY, timeout=10)
+
+        pkey = paramiko.RSAKey(filename=VM_KEY)
+
+        ssh.connect(hostname=VM_HOST, username=VM_USER, pkey=pkey, timeout=10)
 
         ssh.exec_command(f"mkdir -p {os.path.dirname(remote_path)}")
 
