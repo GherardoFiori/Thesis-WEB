@@ -13,9 +13,16 @@ os.makedirs(SANDBOX_DIR, exist_ok=True)
 
 @ensure_csrf_cookie
 def get_csrf_token(request):
-    response = JsonResponse({"csrfToken": get_token(request)})
-    response["Access-Control-Allow-Credentials"] = "true"
+    token = get_token(request)
+    response = JsonResponse({"csrfToken": token})
     response["Access-Control-Allow-Origin"] = "https://www.exterminai.com"
+    response["Access-Control-Allow-Credentials"] = "true"
+    response.set_cookie(
+        key="csrftoken",
+        value=token,
+        secure=True,
+        samesite="None"
+    )
     return response
 
 
