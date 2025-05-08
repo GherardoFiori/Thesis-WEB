@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Shield, Upload, Link as LinkIcon } from 'lucide-react';
 import './App.css';
 import ReportCard from './ReportCard';
-import logo from './assets/ExterminAI logo.png';
+import logo from './public/ExterminAI logo.png';
 
 function App() {
   const [url, setUrl] = useState("");
