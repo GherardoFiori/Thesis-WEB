@@ -117,11 +117,6 @@ function Home() {
         </div>
       </div>
 
-      {isLoading && (
-  <div className="progress-container">
-    <div className="progress-bar" style={{ width: `${progress}%` }} />
-  </div>
-)}
 
       <form onSubmit={handleSubmit} className="form-container">
         <div className="input-group">
@@ -135,6 +130,8 @@ function Home() {
             disabled={isLoading}
           />
         </div>
+
+
 
         <label className="file-upload">
           <div className="file-upload-content">
@@ -154,6 +151,12 @@ function Home() {
 
         {isLoading && (
   <div className="loading-bar" />
+)}
+
+{isLoading && (
+  <div className="progress-container">
+    <div className="progress-bar" style={{ width: `${progress}%` }} />
+  </div>
 )}
 
         <button
