@@ -29,6 +29,11 @@
   color: rgb(96, 165, 250);
 }
 
+.logo-image {
+  height: 40px;
+  object-fit: contain;
+}
+
 .logo-text {
   margin-left: 0.5rem;
   font-size: 1.25rem;
