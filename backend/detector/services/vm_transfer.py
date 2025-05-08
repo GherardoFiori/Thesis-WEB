@@ -13,7 +13,7 @@ def transfer_to_vm(local_path, remote_path):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        pkey = paramiko.RSAKey(filename=VM_KEY)
+        pkey = paramiko.RSAKey.from_private_key_file(VM_KEY)
 
         ssh.connect(hostname=VM_HOST, username=VM_USER, pkey=pkey, timeout=10)
 
