@@ -13,6 +13,7 @@ function Help() {
 
       <p>At the moment this service only supports Firefox and Google Chrome Browser. In the future Edge and Opera will work too!</p>
       <a href="https://chromewebstore.google.com/">Google Chrome Extension Store</a>
+      <br></br>
       <a href="https://addons.mozilla.org/en-US/firefox/extensions/">Firefox Extension Store</a>
     </div>
   );
