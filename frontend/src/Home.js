@@ -55,7 +55,7 @@ function Home() {
       const csrfToken = await getCsrfToken();
       const formData = new FormData();
 
-      if (url) formData.append('url', url);
+      if (url) formData.append('url', url.trim());
       if (file) formData.append('crx_file', file);
 
       const response = await fetch("https://ai-detection-of-malicious-browser.onrender.com/api/analyze/", {
