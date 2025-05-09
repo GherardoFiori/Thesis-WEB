@@ -3,6 +3,7 @@ import requests
 from detector.services.vm_transfer import transfer_to_vm
 from detector.services.vm_analysis import run_analysis_on_vm
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 CHROME_VERSION = "134.0.6998.178"
@@ -11,14 +12,20 @@ SANDBOX_DIR = os.path.join(os.path.dirname(__file__), "..", "sandbox")
 os.makedirs(SANDBOX_DIR, exist_ok=True)
 
 def extract_extension_id(url):
+    # Strip off query parameters and fragments
+    parsed_url = urlparse(url)
+    clean_path = parsed_url.path  # this gives /webstore/detail/name/EXTENSION_ID
+
+    # Extract extension ID from the last part of the path
+    parts = clean_path.strip("/").split("/")
     if "chrome.google.com" in url or "chromewebstore.google.com" in url:
-        return url.split("/")[-1], "chrome"
+        return parts[-1], "chrome"
     elif "addons.mozilla.org" in url:
-        parts = url.split('/')
         if 'addon' in parts:
             return parts[parts.index('addon') + 1], "firefox"
     elif "microsoftedge.microsoft.com/addons" in url:
         raise ValueError("Edge Add-ons not supported.")
+    
     return None, None
 
 def download_crx(url):
