@@ -10,7 +10,8 @@ function Help() {
         alt="How to use ExterminAI"
          className="help-gif"
       />
-
+      <br></br>
+      <br></br>
       <a
         href="https://chromewebstore.google.com/"
         target="_blank"
@@ -18,7 +19,7 @@ function Help() {
       >
         Google Chrome Extension Store
       </a>
-      <br />
+      <br></br>
       <a
         href="https://addons.mozilla.org/en-US/firefox/extensions/"
         target="_blank"
