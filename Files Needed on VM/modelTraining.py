@@ -2,22 +2,22 @@ import os
 import json
 import joblib
 from collections import Counter
-from sklearn.linear_model import LogisticRegression # Chosen model
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import accuracy_score, classification_report
 from dataProcess import extract_features_from_folder, extract_features_from_js_files
 
-# File paths 
-MALWARE_DIR = "path to malware for training"
+# file paths
+MALWARE_DIR = "path to malware_extracted"
 FEATURES_PATH = "path to features.json"
 MODEL_PATH = "path to model.pkl"
 VECTORIZER_PATH = "path to vectorizer.pkl"
 
-#Extract features from all CRX folders
+# Extract features from all CRX folders
 dataset = []
 
-#Load benign using folders
+# Load benign (folder-level)
 benign_base = os.path.join(MALWARE_DIR, "benign_extracted")
 for entry in os.listdir(benign_base):
     folder_path = os.path.join(benign_base, entry)
@@ -31,17 +31,17 @@ for entry in os.listdir(benign_base):
         features["path"] = folder_path
         dataset.append(features)
 
-# Load malicious using files
+# Load malicious (file-level) 
 malicious_base = os.path.join(MALWARE_DIR, "malicious_extracted")
 malicious_samples = extract_features_from_js_files(malicious_base)
 dataset.extend(malicious_samples)
 
-# Save raw features
+# Save raw features for inspection/debugging
 with open(FEATURES_PATH, "w") as f:
     json.dump(dataset, f, indent=2)
-print(f" Features written to {FEATURES_PATH}")
+print(f"[✓] Features written to {FEATURES_PATH}")
 
-
+#  Prepare input/output for ML =
 X_raw = []
 y = []
 for d in dataset:
@@ -50,13 +50,13 @@ for d in dataset:
         y.append(label)
         X_raw.append({k: v for k, v in d.items() if k not in ("label", "path")})
 
-print(f" Label distribution: {Counter(y)}")
+print(f"Label distribution: {Counter(y)}")
 
-#Vectorize features 
+# Vectorize features 
 vec = DictVectorizer(sparse=False)
 X = vec.fit_transform(X_raw)
 
-#  Train-test split
+# Train-test split 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
@@ -65,15 +65,18 @@ X_train, X_test, y_train, y_test = train_test_split(
 model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 print("[Debug] Training labels in y_train:", Counter(y_train))
-print(" Model training complete.")
+print("[✓] Model training complete.")
 
-# Evaluate
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
+# Evaluate 
+probs = model.predict_proba(X_test)[:, 1]
+threshold = 0.7
+preds = (probs >= threshold).astype(int)
+accuracy = accuracy_score(y_test, preds)
 print(f" Test Accuracy: {accuracy * 100:.2f}%")
 
-print("\n Classification Report:")
-print(classification_report(y_test, y_pred, target_names=["Benign", "Malicious"]))
+print("Classification Report:")
+print(classification_report(y_test, preds, target_names=["Benign", "Malicious"]))
+
 
 # Save model and vectorizer 
 joblib.dump(model, MODEL_PATH)

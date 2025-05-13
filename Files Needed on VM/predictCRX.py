@@ -7,6 +7,8 @@ from dataProcess import extract_single
 MODEL_PATH = "path to model.pkl"
 VECTORIZER_PATH = "path to vectorizer.pkl"
 
+print("[DEBUG] Script started") # troubleshooting
+
 def extract_malicious_signals(features):
     suspicious_keys = [
         "uses_eval", "uses_function_constructor", "obfuscated_js",
@@ -47,13 +49,20 @@ def predict(folder_path):
         }))
         sys.exit(1)
 
-    predictions = model.predict(vectors)
     probabilities = model.predict_proba(vectors)
+    malicious_probs = probabilities[:, 1]
+    threshold = 0.7
+    predictions = (malicious_probs >= threshold).astype(int)
 
     malicious_count = sum(predictions)
     benign_count = len(predictions) - malicious_count
     verdict = "malicious" if malicious_count > benign_count else "benign"
-    avg_confidence = round(max(probabilities.mean(axis=0)), 2)
+
+
+    if verdict == "malicious":
+        avg_confidence = round(malicious_probs.mean(), 2)
+    else:
+        avg_confidence = round((1 - malicious_probs).mean(), 2)
 
     features = features_list[0]
     malicious_signals = extract_malicious_signals(features)
@@ -80,6 +89,8 @@ def predict(folder_path):
 
     print(json.dumps(result, indent=2))
 
+
+#  MAIN ENTRY POINT 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 predictCRX.py <folder_path>")
