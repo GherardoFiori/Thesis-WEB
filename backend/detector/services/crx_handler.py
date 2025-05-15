@@ -12,17 +12,20 @@ SANDBOX_DIR = os.path.join(os.path.dirname(__file__), "..", "sandbox")
 os.makedirs(SANDBOX_DIR, exist_ok=True)
 
 def extract_extension_id(url):
-    # Strip off query parameters and fragments
     parsed_url = urlparse(url)
-    clean_path = parsed_url.path  # this gives /webstore/detail/name/EXTENSION_ID
+    path_parts = parsed_url.path.strip("/").split("/")
 
-    # Extract extension ID from the last part of the path
-    parts = clean_path.strip("/").split("/")
+    # Handle new and old Chrome Web Store URLs
     if "chrome.google.com" in url or "chromewebstore.google.com" in url:
-        return parts[-1], "chrome"
+        if "detail" in path_parts and len(path_parts) >= 3:
+            return path_parts[-1], "chrome"  
+        else:
+            raise ValueError("Invalid Chrome Web Store URL structure.")
+    
     elif "addons.mozilla.org" in url:
-        if 'addon' in parts:
-            return parts[parts.index('addon') + 1], "firefox"
+        if 'addon' in path_parts:
+            return path_parts[path_parts.index('addon') + 1], "firefox"
+    
     elif "microsoftedge.microsoft.com/addons" in url:
         raise ValueError("Edge Add-ons not supported.")
     
