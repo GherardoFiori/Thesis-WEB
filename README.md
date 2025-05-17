@@ -2,6 +2,8 @@
 
 > Detecting browser extension threats with machine learning and intelligent analysis.
 
+> Try it out at https://www.exterminai.com/
+
 ## 🚀 Project Overview
 
 Malicious browser extensions are a growing vector for cybersecurity threats, enabling attackers to steal sensitive data, inject unwanted ads, or hijack browser sessions. This project leverages artificial intelligence to detect potentially harmful browser extensions based on their behavior, metadata, and code structure.
