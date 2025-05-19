@@ -21,6 +21,8 @@ ________            __                                    __           ______  _
 
 > Detecting browser extension threats with machine learning and intelligent analysis.
 
+> ⚠️ This tool is not as accurate as I want it to be, Please use with caution as I improve the dataset of the model for improved accuracy ⚠️ 
+
 > Try it out at https://www.exterminai.com/
 
 ## 🚀 Project Overview
