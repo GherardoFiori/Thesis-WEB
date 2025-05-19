@@ -6,6 +6,7 @@
 ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝
 
 
+
 # 🛡️ AI Detection of Malicious Browser Extensions
 
 > Detecting browser extension threats with machine learning and intelligent analysis.
