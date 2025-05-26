@@ -54,7 +54,6 @@ My goal is to develop a scalable and accurate system that can automatically flag
 - Pandas, NumPy
 - Matplotlib, Seaborn
 - CRX/ZIP parsing libraries
-- (Optional) NLP libraries for source code analysis
 
 ## 🔒 Disclaimer
 This tool is intended for research and educational purposes only. Accuracy is based on available datasets and model performance. It is not a substitute for professional security auditing tools. I take no responsibility on how you handle the malware for the AI training.
